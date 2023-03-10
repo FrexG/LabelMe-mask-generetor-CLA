@@ -24,38 +24,49 @@ def make_shapes(path):
             `path`: relative path of the folder containing the annotation for 
                     individual videos 
     """
+    label_color_dict = {
+                        "Leaf_rust":(0,0,255),
+                        "leaf_miner":(255,0,0),
+                        "free_feeder":(100,0,200),
+                        "leaf_skeletonizer":(0,190,256)
+                        }
+
     if os.path.exists(path):
-        directories = os.listdir(path) # Find all the sub-directories and files
-        print(f'[INFO ...] found {len(directories)} sub directories')
+        save_dir = os.path.join(path,"masks")
+        
+        try:
+            os.mkdir(save_dir)
+        except Exception as e:
+            print(e)
 
-        for dir in directories: # Loop through all the directories and files
-            images = [] 
-            masks = []   
-            current_path = os.path.join(path,dir)
+        images = []
+        masks = []
 
-            json_files = glob.glob(current_path+"/*.json") # find all .json files in the current directory
-            # read the contents of each json file
-            for file in tqdm(json_files):
-                with open(file) as f:
-                    data = json.load(f)
-                    image_path = os.path.join(current_path,data["imagePath"])
+        json_files = glob.glob(path+"/*.json") # find all .json files in the current directory
+        
+        # read the contents of each json file
+        for file in tqdm(json_files):
+            with open(file) as f:
+                data = json.load(f)
+                image_path = os.path.join(path,data["imagePath"])
 
-                    im = cv.imread(image_path)
-                    mask = np.zeros((im.shape[0],im.shape[1]))
+                im = cv.imread(image_path)
+                mask = np.zeros((im.shape[0],im.shape[1],3))
 
-                    for shape in data["shapes"]: # Draw polly for each pollygon in the annotation
-                        mask = cv.fillPoly(mask,np.array([shape["points"]],np.int32),color=255)
+                for shape in data["shapes"]: # Draw polly for each pollygon in the annotation
+                    fill_color = label_color_dict[shape["label"]]
+                    mask = cv.fillPoly(mask,np.array([shape["points"]],np.int32),color=fill_color)
+                    
+                images.append(data['imagePath'])
 
-                    images.append(os.path.join(dir,data['imagePath']))
+                mask_filename = f"{data['imagePath'].split('.')[0]}_mask.jpg"
+                masks.append(os.path.join("masks",mask_filename))
 
-                    mask_filename = f"{data['imagePath'].split('.')[0]}_mask.jpg"
-                    masks.append(os.path.join(dir,mask_filename))
-
-                    cv.imwrite(os.path.join(current_path,f"{data['imagePath'].split('.')[0]}_mask.jpg"),mask) # save mask to file
+                cv.imwrite(os.path.join(save_dir,f"{data['imagePath'].split('.')[0]}_mask.jpg"),mask) # save mask to file
 
             if len(masks) > 0:
                 df = pd.DataFrame({'images_names':images,'mask_names':masks})
-                df.to_csv(f'{current_path}/annotations.csv')
+                df.to_csv(f'{path}/annotations.csv')
     else:
         raise(FileNotFoundError)
 
