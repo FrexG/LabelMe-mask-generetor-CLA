@@ -25,7 +25,8 @@ def make_shapes(path):
                     individual videos 
     """
     label_color_dict = {
-                        "Leaf_rust":(0,0,255),
+                        "leaf_rust":(0,0,255),
+                        "leaf_spot":(56,89,120),
                         "leaf_miner":(255,0,0),
                         "free_feeder":(100,0,200),
                         "leaf_skeletonizer":(0,190,256)
