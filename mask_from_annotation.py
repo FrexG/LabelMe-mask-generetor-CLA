@@ -24,6 +24,7 @@ def make_shapes(path):
             `path`: relative path of the folder containing the annotation for 
                     individual videos 
     """
+
     label_color_dict = {
                         "leaf_rust":(0,0,255),
                         "leaf_spot":(56,89,120),
