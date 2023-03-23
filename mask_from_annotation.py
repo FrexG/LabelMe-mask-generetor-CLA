@@ -71,8 +71,6 @@ def make_shapes(path):
     else:
         raise(FileNotFoundError)
 
-
-# Create the parser object
 parser = argparse.ArgumentParser()
 # Add an argument
 parser.add_argument('--source',type=str,required=True) 
